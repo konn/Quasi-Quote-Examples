@@ -18,14 +18,14 @@ data Printf = Lit Char
 readDec' :: String ->  Maybe(Int, String)
 readDec' = listToMaybe . readDec
 
-buildPrintf :: String -> [Printf]
-buildPrintf ""     = []
-buildPrintf (c:cs) = fromJust $ 
+parsePrintf :: String -> [Printf]
+parsePrintf ""     = []
+parsePrintf (c:cs) = fromJust $ 
   case c of
     '%' -> do (sym, rest) <- readSym cs
-              return (sym : buildPrintf rest)
-          <|> return (Lit '%' : buildPrintf cs)
-    _   -> return (Lit c : buildPrintf cs)
+              return (sym : parsePrintf rest)
+          <|> return (Lit '%' : parsePrintf cs)
+    _   -> return (Lit c : parsePrintf cs)
   where
     readSym [] = Nothing
     readSym (c':cs') = case c' of
@@ -55,5 +55,5 @@ toExpQ fun     = do
   return (return exp, Just name)
 
 printf :: QuasiQuoter
-printf = QuasiQuoter { quoteExp = buildFun . buildPrintf
+printf = QuasiQuoter { quoteExp = buildFun . parsePrintf
                      , quotePat = undefined}

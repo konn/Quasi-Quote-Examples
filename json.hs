@@ -65,16 +65,24 @@ js = QuasiQuoter { quoteExp = parseExp
                  , quotePat = parsePat
                  }
 
-parseExp :: String -> ExpQ
-parseExp str = do
+parseQa :: (JSON -> Q a) -> String -> Q a
+parseQa jsonToA str = do
   loc <- location
   let pos = uncurry (newPos $ loc_filename loc) (loc_start loc)
       ans = parse (setPosition pos >> (json <* many space)) (loc_filename loc) str
       jsv = either (error.show) id ans
-  dataToExpQ (const Nothing `extQ` antiQuoteE) jsv
+  jsonToA jsv
+
+parseExp :: String -> ExpQ
+parseExp = parseQa (dataToExpQ $ const Nothing `extQ` antiQuoteE)
 
 antiQuoteE :: JSON -> Maybe ExpQ
 antiQuoteE (JSQuote nm) = Just $ appE (varE 'toJSON) (varE $ mkName nm)
 antiQuoteE _ = Nothing
 
-parsePat = undefined
+parsePat :: String -> PatQ
+parsePat = parseQa (dataToPatQ $ const Nothing `extQ` antiQuoteP)
+
+antiQuoteP :: JSON -> Maybe PatQ
+antiQuoteP (JSQuote nm) = Just (varP $ mkName nm)
+antiQuoteP _ = Nothing
