@@ -1,5 +1,5 @@
-{-# LANGUAGE TemplateHaskell, QuasiQuotes, GADTs, DeriveDataTypeable #-}
-{-# LANGUAGE OverlappingInstances, TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable, OverlappingInstances #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 import Language.Haskell.TH
 import Language.Haskell.TH.Quote
 import Text.Parsec hiding ((<|>))
